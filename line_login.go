@@ -10,6 +10,8 @@ import (
 	social "github.com/kkdai/line-login-sdk-go"
 )
 
+var codeVerifier string
+var codeChallenge string
 var nonce string
 var state string
 
@@ -18,22 +20,6 @@ func browse(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.Execute(w, nil); err != nil {
 		log.Println("Template err:", err)
 	}
-}
-
-func gotoPKCEauthpage(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		log.Printf("ParseForm() err: %v\n", err)
-		return
-	}
-	chatbot := r.FormValue("chatbot")
-
-	scope := "profile openid"
-	state = social.GenerateNonce()
-	nonce = social.GenerateNonce()
-
-	redirectURL := fmt.Sprintf("%s/auth", serverURL)
-	targetURL := socialClient.GetWebLoinURL(redirectURL, state, scope, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
-	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
 func gotoauthpage(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +48,10 @@ func gotoauthOpenIDpage(w http.ResponseWriter, r *http.Request) {
 	state = social.GenerateNonce()
 	nonce = social.GenerateNonce()
 	redirectURL := fmt.Sprintf("%s/auth", serverURL)
-	targetURL := socialClient.GetWebLoinURL(redirectURL, state, scope, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+
+	codeVerifier = social.GenerateCodeVerifier(43)
+	codeChallenge = social.PkceChallenge(codeVerifier)
+	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
 	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
@@ -82,7 +71,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	log.Println("code:", code, " state:", state, "friend status:", friendshipStatusChanged)
 
 	//Request for access token
-	token, err := socialClient.GetAccessToken(fmt.Sprintf("%s/auth", serverURL), code).Do()
+	token, err := socialClient.GetAccessTokenPKCE(fmt.Sprintf("%s/auth", serverURL), code, codeVerifier).Do()
 	if err != nil {
 		log.Println("RequestLoginToken err:", err)
 		return

@@ -43,7 +43,6 @@ func main() {
 	http.HandleFunc("/", browse)
 	http.HandleFunc("/gotoauthOpenIDpage", gotoauthOpenIDpage)
 	http.HandleFunc("/gotoauthpage", gotoauthpage)
-	http.HandleFunc("/gotoPKCEauthpage", gotoPKCEauthpage)
 	http.HandleFunc("/auth", auth)
 
 	//For linked chatbot
