@@ -33,7 +33,11 @@ func gotoauthpage(w http.ResponseWriter, r *http.Request) {
 	state = social.GenerateNonce()
 	nonce = social.GenerateNonce()
 	redirectURL := fmt.Sprintf("%s/auth", serverURL)
-	targetURL := socialClient.GetWebLoinURL(redirectURL, state, scope, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+
+	codeVerifier = social.GenerateCodeVerifier(43)
+	codeChallenge = social.PkceChallenge(codeVerifier)
+
+	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
 	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
