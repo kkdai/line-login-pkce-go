@@ -38,7 +38,7 @@ func gotoauthpage(w http.ResponseWriter, r *http.Request) {
 	codeChallenge = social.PkceChallenge(codeVerifier)
 
 	log.Println("gotoauthpage - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
-	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+	targetURL := socialClient.GetWebLoinURL(redirectURL, state, scope, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
 	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
@@ -58,7 +58,7 @@ func gotoauthOpenIDpage(w http.ResponseWriter, r *http.Request) {
 	codeChallenge = social.PkceChallenge(codeVerifier)
 
 	log.Println("gotoauthOpenIDpage - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
-	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+	targetURL := socialClient.GetWebLoinURL(redirectURL, state, scope, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
 	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
@@ -79,7 +79,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 	//Request for access token
 	log.Println("GetAccessTokenPKCE - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
-	token, err := socialClient.GetAccessTokenPKCE(fmt.Sprintf("%s/auth", serverURL), code, codeVerifier).Do()
+	token, err := socialClient.GetAccessToken(fmt.Sprintf("%s/auth", serverURL), code).Do()
 	if err != nil {
 		log.Println("RequestLoginToken err:", err)
 		return
