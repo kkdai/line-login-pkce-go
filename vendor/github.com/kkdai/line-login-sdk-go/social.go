@@ -392,20 +392,19 @@ func (call *GetAccessTokenPKCECall) Do() (*TokenResponse, error) {
 	data.Set("code_verifier", call.codeVerifier)
 
 	log.Println("oooooooooo")
-	res, err1 := call.c.post(call.ctx, APIEndpointToken, strings.NewReader(data.Encode()))
+	res, err := call.c.post(call.ctx, APIEndpointToken, strings.NewReader(data.Encode()))
 	if res != nil && res.Body != nil {
 		defer res.Body.Close()
 	}
 
-	bodyBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
-	}
-	bodyString := string(bodyBytes)
-	log.Println(bodyString)
+		bodyBytes, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
 
-	if err1 != nil {
-		log.Println("iiiiii")
 		return nil, err
 	}
 	return decodeToTokenResponse(res)
