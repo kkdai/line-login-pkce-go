@@ -78,7 +78,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	log.Println("code:", code, " state:", state, "friend status:", friendshipStatusChanged)
 
 	//Request for access token
-	log.Println("GetAccessTokenPKCE - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
+	log.Println("GetAccessTokenPKCE - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge, "url", fmt.Sprintf("%s/auth", serverURL))
 	token, err := socialClient.GetAccessTokenPKCE(fmt.Sprintf("%s/auth", serverURL), code, codeVerifier).Do()
 	if err != nil {
 		log.Println("RequestLoginToken err:", err)
