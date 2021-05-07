@@ -2,7 +2,6 @@ package social
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -391,20 +390,11 @@ func (call *GetAccessTokenPKCECall) Do() (*TokenResponse, error) {
 	data.Set("client_secret", call.c.channelSecret)
 	data.Set("code_verifier", call.codeVerifier)
 
-	log.Println("oooooooooo")
 	res, err := call.c.post(call.ctx, APIEndpointToken, strings.NewReader(data.Encode()))
 	if res != nil && res.Body != nil {
 		defer res.Body.Close()
 	}
-
 	if err != nil {
-		bodyBytes, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-
 		return nil, err
 	}
 	return decodeToTokenResponse(res)

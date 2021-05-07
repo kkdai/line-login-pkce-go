@@ -3,10 +3,8 @@ package social
 import (
 	"crypto/sha256"
 	b64 "encoding/base64"
-	"io/ioutil"
 	"log"
 	"math/rand"
-	"net/http"
 	"time"
 )
 
@@ -56,16 +54,4 @@ func base64Decode(payload string) string {
 		}
 	}
 	return payload
-}
-
-func printErrResponseBody(res *http.Response) {
-	if res.Body != nil {
-		bodyBytes, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-
-	}
 }
