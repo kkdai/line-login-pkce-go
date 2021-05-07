@@ -2,7 +2,6 @@ package social
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -397,14 +396,8 @@ func (call *GetAccessTokenPKCECall) Do() (*TokenResponse, error) {
 		defer res.Body.Close()
 	}
 
-	bodyBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
-	}
-	bodyString := string(bodyBytes)
-	log.Println(bodyString)
-
-	if err != nil {
+		printErrResponseBody(res)
 		return nil, err
 	}
 	return decodeToTokenResponse(res)
