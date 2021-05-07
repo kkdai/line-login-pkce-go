@@ -10,8 +10,8 @@ import (
 	social "github.com/kkdai/line-login-sdk-go"
 )
 
-var codeVerifier string
-var codeChallenge string
+var codeVerifier string = "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
+var codeChallenge string = "BSCQwo_m8Wf0fpjmwkIKmPAJ1A7tiuRSNDnXzODS7QI"
 var nonce string
 var state string
 
@@ -34,8 +34,8 @@ func gotoauthpage(w http.ResponseWriter, r *http.Request) {
 	nonce = social.GenerateNonce()
 	redirectURL := fmt.Sprintf("%s/auth", serverURL)
 
-	codeVerifier = social.GenerateCodeVerifier(43)
-	codeChallenge = social.PkceChallenge(codeVerifier)
+	// codeVerifier = social.GenerateCodeVerifier(43)
+	// codeChallenge = social.PkceChallenge(codeVerifier)
 
 	log.Println("gotoauthpage - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
 	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
@@ -54,8 +54,8 @@ func gotoauthOpenIDpage(w http.ResponseWriter, r *http.Request) {
 	nonce = social.GenerateNonce()
 	redirectURL := fmt.Sprintf("%s/auth", serverURL)
 
-	codeVerifier = social.GenerateCodeVerifier(43)
-	codeChallenge = social.PkceChallenge(codeVerifier)
+	// codeVerifier = social.GenerateCodeVerifier(43)
+	// codeChallenge = social.PkceChallenge(codeVerifier)
 
 	log.Println("gotoauthOpenIDpage - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
 	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
