@@ -390,6 +390,7 @@ func (call *GetAccessTokenPKCECall) Do() (*TokenResponse, error) {
 	data.Set("client_secret", call.c.channelSecret)
 	data.Set("code_verifier", call.codeVerifier)
 
+	log.Println("oooooooooo")
 	res, err := call.c.post(call.ctx, APIEndpointToken, strings.NewReader(data.Encode()))
 	if res != nil && res.Body != nil {
 		defer res.Body.Close()
