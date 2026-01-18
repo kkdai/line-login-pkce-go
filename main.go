@@ -44,6 +44,7 @@ func main() {
 	http.HandleFunc("/gotoauthOpenIDpage", gotoauthOpenIDpage)
 	http.HandleFunc("/gotoauthpage", gotoauthpage)
 	http.HandleFunc("/auth", auth)
+	http.HandleFunc("/logout", logout)
 
 	//For linked chatbot
 	http.HandleFunc("/callback", callbackHandler)

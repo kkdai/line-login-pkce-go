@@ -14,6 +14,7 @@ var codeVerifier string
 var codeChallenge string
 var nonce string
 var state string
+var currentAccessToken string
 
 func browse(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("login.tmpl"))
@@ -87,6 +88,9 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("access_token:", token.AccessToken, " refresh_token:", token.RefreshToken)
 
+	// Store access token for logout
+	currentAccessToken = token.AccessToken
+
 	//Start to verify token and renew it.
 	if result, err := socialClient.TokenVerify(token.AccessToken).Do(); err != nil {
 		log.Println("TokenVerify err:", err, result)
@@ -126,4 +130,30 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.Execute(w, payload); err != nil {
 		log.Println("Template err:", err)
 	}
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	if currentAccessToken == "" {
+		log.Println("No access token to revoke")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// Revoke the access token (only if socialClient is initialized)
+	if socialClient != nil {
+		if _, err := socialClient.RevokeToken(currentAccessToken).Do(); err != nil {
+			log.Println("RevokeToken err:", err)
+			// Even if revoke fails, clear local token and redirect
+		} else {
+			log.Println("Access token revoked successfully")
+		}
+	} else {
+		log.Println("socialClient not initialized, skipping API call")
+	}
+
+	// Clear the stored token
+	currentAccessToken = ""
+
+	// Redirect to login page
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
