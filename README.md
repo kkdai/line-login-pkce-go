@@ -23,6 +23,18 @@ Before deploy this to your Heroku, you will need complete as follows:
 - Crete a LINE Message API channel. Remember it's channel secret and token.
 - Link the chatbot to the LINE login channel
 
+Dependencies
+=============
+
+- [line-login-sdk-go](https://github.com/kkdai/line-login-sdk-go) `v0.9.0` (requires Go 1.23+)
+- [line-bot-sdk-go v7](https://github.com/line/line-bot-sdk-go)
+
+Notes on SDK v0.9.0 usage:
+
+- `GenerateNonce`, `GenerateCodeVerifier` and `GetPKCEWebLoginURL` now return an `error` that must be handled.
+- `GetPKCEWebLoinURL` (misspelled) is deprecated; use `GetPKCEWebLoginURL`.
+- ID token payload type is now `social.BasicPayload`, and `DecodePayloadWithOptions` is used to also verify `nonce` and `exp`.
+
 License
 =============
 

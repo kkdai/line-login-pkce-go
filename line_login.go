@@ -31,15 +31,33 @@ func gotoauthpage(w http.ResponseWriter, r *http.Request) {
 	chatbot := r.FormValue("chatbot")
 
 	scope := "profile" //profile | openid | email
-	state = social.GenerateNonce()
-	nonce = social.GenerateNonce()
+	var err error
+	if state, err = social.GenerateNonce(); err != nil {
+		log.Println("GenerateNonce err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	if nonce, err = social.GenerateNonce(); err != nil {
+		log.Println("GenerateNonce err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	redirectURL := fmt.Sprintf("%s/auth", serverURL)
 
-	codeVerifier = social.GenerateCodeVerifier(43)
+	if codeVerifier, err = social.GenerateCodeVerifier(43); err != nil {
+		log.Println("GenerateCodeVerifier err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	codeChallenge = social.PkceChallenge(codeVerifier)
 
 	log.Println("gotoauthpage - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
-	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+	targetURL, err := socialClient.GetPKCEWebLoginURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+	if err != nil {
+		log.Println("GetPKCEWebLoginURL err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
@@ -51,15 +69,33 @@ func gotoauthOpenIDpage(w http.ResponseWriter, r *http.Request) {
 	chatbot := r.FormValue("chatbot")
 
 	scope := "profile openid" //profile | openid | email
-	state = social.GenerateNonce()
-	nonce = social.GenerateNonce()
+	var err error
+	if state, err = social.GenerateNonce(); err != nil {
+		log.Println("GenerateNonce err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	if nonce, err = social.GenerateNonce(); err != nil {
+		log.Println("GenerateNonce err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	redirectURL := fmt.Sprintf("%s/auth", serverURL)
 
-	codeVerifier = social.GenerateCodeVerifier(43)
+	if codeVerifier, err = social.GenerateCodeVerifier(43); err != nil {
+		log.Println("GenerateCodeVerifier err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	codeChallenge = social.PkceChallenge(codeVerifier)
 
 	log.Println("gotoauthOpenIDpage - codeVerifier:", codeVerifier, " codeChallenge:", codeChallenge)
-	targetURL := socialClient.GetPKCEWebLoinURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+	targetURL, err := socialClient.GetPKCEWebLoginURL(redirectURL, state, scope, codeChallenge, social.AuthRequestOptions{Nonce: nonce, BotPrompt: chatbot, Prompt: "consent"})
+	if err != nil {
+		log.Println("GetPKCEWebLoginURL err:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	http.Redirect(w, r, targetURL, http.StatusSeeOther)
 }
 
@@ -103,7 +139,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload *social.Payload
+	var payload *social.BasicPayload
 	if len(token.IDToken) == 0 {
 		// User don't request openID, use access token to get usere profile
 		log.Println(" token:", token, " AccessToken:", token.AccessToken)
@@ -112,13 +148,13 @@ func auth(w http.ResponseWriter, r *http.Request) {
 			log.Println("GetUserProfile err:", err)
 			return
 		}
-		payload = &social.Payload{
+		payload = &social.BasicPayload{
 			Name:    res.DisplayName,
 			Picture: res.PictureURL,
 		}
 	} else {
 		//Decode token.IDToken to payload
-		payload, err = token.DecodePayload(channelID)
+		payload, err = token.DecodePayloadWithOptions(channelID, social.DecodePayloadOptions{Nonce: nonce, CheckExpiry: true})
 		if err != nil {
 			log.Println("DecodeIDToken err:", err)
 			return
